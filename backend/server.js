@@ -8,7 +8,12 @@ const app = express();
 
 connectDB();
 
-app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:8081",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 

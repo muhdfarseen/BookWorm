@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-navigation/native": "^7.0.3",
     "@tamagui/animations-react-native": "^1.125.8",
     "@tamagui/font-inter": "^1.125.8",
@@ -19,6 +20,9 @@
     "@tamagui/react-native-media-driver": "^1.125.8",
     "@tamagui/shorthands": "^1.125.8",
     "@tamagui/themes": "^1.125.8",
+    "@tamagui/toast": "^1.126.18",
+    "axios": "^1.10.0",
+    "burnt": "^0.13.0",
     "expo": "^53.0.11",
     "expo-constants": "~17.1.4",
     "expo-font": "~13.3.1",
@@ -35,6 +39,7 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "^15.12.0",
+    "react-native-toast-message": "^2.3.0",
     "react-native-web": "^0.20.0",
     "tamagui": "^1.125.8"
   },

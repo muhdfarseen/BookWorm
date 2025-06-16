@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { TamaguiProvider } from 'tamagui';
 
 import config from '../tamagui.config';
+import Toast from 'react-native-toast-message';
 
 export default function Layout() {
   const [loaded] = useFonts({
@@ -27,6 +28,7 @@ export default function Layout() {
           headerShown: true, 
         }}
       >
+        
         <Stack.Screen
           name="(tabs)"
           options={{
@@ -35,6 +37,7 @@ export default function Layout() {
           }}
           
         />
+
       </Stack>
     </TamaguiProvider>
   );
