@@ -1,34 +1,47 @@
 import { bookModel } from "../models/book.model.js";
 import mongoose from "mongoose";
+import NodeCache from "node-cache";
+const cache = new NodeCache({ stdTTL: 300 }); 
 
-// POST /books
+
 export const addBook = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { title, author, genre, status } = req.body;
+    const { title, author, genre } = req.body;
 
     const bookExists = await bookModel.findOne({ userId, title });
+    
     if (bookExists) {
       return res.status(400).json({ msg: "Book with this title already exists" });
     }
 
-    const book = await bookModel.create({ userId, title, author, genre, status });
+    const book = await bookModel.create({ userId, title, author, genre });
+    cache.del(userId);
     res.status(201).json({ msg: "Book added successfully", book });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: "Failed to add book" });
+    res.status(500).json({ msg: "Failed to add book" })
   }
 };
 
-// GET /books
+
+
 export const getBooks = async (req, res) => {
   try {
     const userId = req.user.id;
+
+    const cachedBooks = cache.get(userId);
+    if (cachedBooks) {
+      return res.status(200).json({ msg: "Books fetched from cache", data: cachedBooks });
+    }
+
     const books = await bookModel.find({ userId });
 
     if (!books.length) {
-      return res.status(404).json({ msg: "No books found" });
+      return res.status(200).json({ msg: "No books found" });
     }
+
+    cache.set(userId, books);
 
     res.status(200).json({ msg: "Books fetched successfully", data: books });
   } catch (err) {
@@ -37,20 +50,20 @@ export const getBooks = async (req, res) => {
   }
 };
 
-// DELETE /books/:id
+
 export const deleteBook = async (req, res) => {
   try {
     const userId = req.user.id;
-    const bookId = req.query.id;
-
-    if (!bookId) return res.status(400).json({ msg: "Book ID is required" });
-
-    const result = await bookModel.deleteOne({ _id: bookId, userId });
-
+    const { id } = req.params;
+    
+    if (!id) return res.status(400).json({ msg: "Book ID is required" });
+    
+    const result = await bookModel.deleteOne({ _id: id, userId });
+    
     if (result.deletedCount === 0) {
       return res.status(404).json({ msg: "Book not found" });
     }
-
+    cache.del(userId);
     res.status(200).json({ msg: "Book deleted successfully" });
   } catch (err) {
     console.error(err);
@@ -58,7 +71,7 @@ export const deleteBook = async (req, res) => {
   }
 };
 
-// PUT /books/:id
+
 export const updateBook = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -69,7 +82,7 @@ export const updateBook = async (req, res) => {
       { _id: id, userId },
       { ...updatedBook }
     );
-
+    cache.del(userId);
     res.status(200).json({ msg: "Book updated successfully", result: updated });
   } catch (err) {
     console.error(err);
@@ -77,7 +90,7 @@ export const updateBook = async (req, res) => {
   }
 };
 
-// PATCH /books/:id/status
+
 export const updateBookStatus = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -86,7 +99,7 @@ export const updateBookStatus = async (req, res) => {
 
     const newStatus = !currentStatus;
     await bookModel.updateOne({ _id: id, userId }, { status: newStatus });
-
+    cache.del(userId);
     res.status(200).json({ msg: "Book status updated", newStatus });
   } catch (err) {
     console.error(err);
@@ -94,7 +107,7 @@ export const updateBookStatus = async (req, res) => {
   }
 };
 
-// PATCH /books/:id/rate
+
 export const setBookRating = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -102,6 +115,7 @@ export const setBookRating = async (req, res) => {
     const { rating } = req.body;
 
     await bookModel.updateOne({ _id: id, userId }, { rating });
+    cache.del(userId);
     res.status(200).json({ msg: "Rating updated", rating });
   } catch (err) {
     console.error(err);
@@ -109,7 +123,7 @@ export const setBookRating = async (req, res) => {
   }
 };
 
-// PATCH /books/:id/review
+
 export const setBookReview = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -117,6 +131,7 @@ export const setBookReview = async (req, res) => {
     const { review } = req.body;
 
     await bookModel.updateOne({ _id: id, userId }, { review });
+    cache.del(userId);
     res.status(200).json({ msg: "Review updated", review });
   } catch (err) {
     console.error(err);
@@ -124,7 +139,7 @@ export const setBookReview = async (req, res) => {
   }
 };
 
-// GET /books/ratings
+
 export const getBookRatings = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -135,7 +150,6 @@ export const getBookRatings = async (req, res) => {
       title,
       rating,
     }));
-
     res.status(200).json({ msg: "Ratings fetched", data: ratings });
   } catch (err) {
     console.error(err);
@@ -143,7 +157,7 @@ export const getBookRatings = async (req, res) => {
   }
 };
 
-// GET /books/average-rating
+
 export const getBooksAvgRating = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -154,7 +168,7 @@ export const getBooksAvgRating = async (req, res) => {
     ]);
 
     const avgRating = result[0]?.averageRating || 0;
-    res.status(200).json({ msg: "Average rating calculated", avgRating });
+    res.status(200).json({ avgRating });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error calculating average rating" });

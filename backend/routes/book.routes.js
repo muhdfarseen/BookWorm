@@ -14,19 +14,13 @@ import {
 
 const router = express.Router();
 
-// Middleware to authenticate requests
 router.use(authenticate);
 
-// Books
-router.route("/").get(getBooks).post(addBook).delete(deleteBook);
-router.route("/:id").put(updateBook);
-
-// Status, Rating, Review
+router.route("/").get(getBooks).post(addBook);
+router.route("/:id").put(updateBook).delete(deleteBook);
 router.patch("/:id/status", updateBookStatus);
 router.patch("/:id/rate", setBookRating);
 router.patch("/:id/review", setBookReview);
-
-// Extra
 router.get("/ratings", getBookRatings);
 router.get("/average-rating", getBooksAvgRating);
 

@@ -6,6 +6,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "start": "expo start",
+    "startemulator": "emulator -avd Pixel_9",
+    "dev": "emulator -avd Pixel_9 & sleep 10 && npx expo start --android",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
     "web": "expo start --web"

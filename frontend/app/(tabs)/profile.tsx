@@ -1,16 +1,36 @@
-import { LogOut } from '@tamagui/lucide-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LogOut, Star } from '@tamagui/lucide-icons';
 import { router } from 'expo-router';
-import { Avatar, Button, Text, YStack } from 'tamagui';
-
-const user = {
-  name: 'Muhammed Farseen TP',
-  email: 'farseen@example.com',
-};
+import { useEffect, useState } from 'react';
+import { Avatar, Button, Text, XStack, YStack } from 'tamagui';
+import { axiosAuthInstance } from '~/utils/axiosAuthinstance';
 
 export default function Profile() {
+  const [avgRating, setAvgRating] = useState(0);
+  const [userName, setUserName] = useState('Guest User');
+  const [userEmail, setUserEmail] = useState('Guest User');
+
   const handleLogOut = async () => {
+    await AsyncStorage.clear();
     router.replace('/');
   };
+
+  const getAvgRating = async () => {
+    const response = await axiosAuthInstance.get(`/books/average-rating`);
+    setAvgRating(response.data.avgRating);
+  };
+
+  const fetchUserData = async () => {
+    const username = await AsyncStorage.getItem('@username');
+    const userEmail = await AsyncStorage.getItem('@userEmail');
+    setUserName(username || 'Guest User');
+    setUserEmail(userEmail || 'Guest User');
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    getAvgRating();
+  }, []);
 
   return (
     <YStack f={1} p="$4" gap="$4" bg="$background">
@@ -20,8 +40,19 @@ export default function Profile() {
           <Avatar.Fallback />
         </Avatar>
 
-        <Text style={{ fontSize: 24, fontWeight: 'bold', marginTop: 15 }}>{user.name}</Text>
-        <Text color="$gray10">{user.email}</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', marginTop: 15 }}>{userName}</Text>
+
+        <Text color="$gray10">{userEmail}</Text>
+        <XStack mt="$5" gap="$1">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Star key={i} size="$" color={i <= avgRating  ? '#facc15' : '#d1d5db'} />
+          ))}
+        </XStack>
+        <Text fontSize={'$2'} color="$gray10" mt="$2">
+          Your Average Book Rating
+        </Text>
+
+        
       </YStack>
 
       <YStack gap={'$3'} mt="$2">
@@ -33,11 +64,7 @@ export default function Profile() {
           <Text>Change Password</Text>
         </Button>
 
-        <Button
-          onPress={handleLogOut}
-          color={'$red10Light'}
-          theme={'red'}
-          icon={LogOut}>
+        <Button onPress={handleLogOut} color={'$red10Light'} theme={'red'} icon={LogOut}>
           <Text color={'$red10Light'}>Logout</Text>
         </Button>
       </YStack>

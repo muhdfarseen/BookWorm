@@ -4,6 +4,18 @@
     "slug": "BookWorm",
     "version": "1.0.0",
     "scheme": "BookWorm",
+    "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSAllowsLocalNetworking": true,
+          "NSExceptionDomains": {
+            "192.168.1.4": {
+              "NSExceptionAllowsInsecureHTTPLoads": true,
+              "NSRequiresCertificateTransparency": false
+            }
+          }
+        }
+      },
     "web": {
       "bundler": "metro",
       "output": "static",

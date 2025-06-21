@@ -9,7 +9,7 @@ const app = express();
 connectDB();
 
 const corsOptions = {
-  origin: "http://localhost:8081",
+  origin: ["http://localhost:8081" , "http://127.0.0.1:8081", "http://172.20.10.2:8081/"],
   credentials: true,
 };
 

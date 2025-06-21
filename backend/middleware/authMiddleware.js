@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { userModel } from '../models/user.model.js';
 
-export const authenticate = async(req, res, next) => {
+export const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
@@ -15,6 +15,11 @@ export const authenticate = async(req, res, next) => {
     req.user = await userModel.findById(decoded.id).select('-password');
     next();
   } catch (err) {
-    return res.status(403).json({ msg: 'Invalid or expired token',err });
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ msg: 'Token expired' });
+    } else if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ msg: 'Invalid token' });
+    }
+    return res.status(500).json({ msg: 'Something went wrong', err });
   }
 };

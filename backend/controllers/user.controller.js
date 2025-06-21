@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { userModel } from '../models/user.model.js';
 import { generateAccessToken, generateRefreshToken } from '../utils/generateToken.js';
 
@@ -59,23 +60,30 @@ export const loginUser = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
-
+  
   if (!refreshToken) return res.status(401).json({ msg: 'Missing refresh token' });
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    
+
     const user = await userModel.findById(decoded.id);
 
     if (!user || user.refreshToken !== refreshToken) {
-      return res.status(403).json({ msg: 'Invalid refresh token' });
+      return res.status(401).json({ msg: 'Invalid refresh token' });
     }
 
     const newAccessToken = generateAccessToken(user._id);
-
     res.status(200).json({ accessToken: newAccessToken });
-    
+
   } catch (err) {
-    return res.status(403).json({ msg: 'Invalid token or expired' });
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ msg: 'Refresh token expired' });
+    } else if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ msg: 'Invalid refresh token' });
+    }
+    return res.status(500).json({ msg: 'Server error', err });
   }
 };
+
 

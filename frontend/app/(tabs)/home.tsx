@@ -1,17 +1,28 @@
-import { View, Text } from 'react-native';
-import { ToggleGroup, ScrollView } from 'tamagui';
+import { View } from 'react-native';
+import { ToggleGroup, Text } from 'tamagui';
 import { CompletedBooks } from '../../components/CompletedBooks';
 import { PendingBooks } from '../../components/PendingBooks';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
-const home = () => {
+const Home = () => {
   const [pendingActive, setPenidngActive] = useState(true);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    AsyncStorage.getItem('@username').then((value) => {
+      if (value) {
+        setUsername(value);
+      }
+    });
+  }, []);
 
   return (
     <>
-      <View style={{padding: 20}}>
+      <View style={{ padding: 20 }}>
         <Text style={{ fontSize: 24 }}>Welcome</Text>
-        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Muhammed Farseen</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{username}</Text>
         <Text style={{ fontSize: 16, color: 'gray', marginTop: 5 }}>
           A reader lives a thousand lives before he dies
         </Text>
@@ -26,11 +37,11 @@ const home = () => {
         </ToggleGroup>
       </View>
 
-      <ScrollView paddingHorizontal={20} style={{ flex: 1 }}>
-        {pendingActive ? <PendingBooks /> : <CompletedBooks />}
-      </ScrollView>
+      {pendingActive ? <PendingBooks /> : <CompletedBooks />}
+
+      <Toast position="top" />
     </>
   );
 };
 
-export default home;
+export default Home;
